@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PODsnap — BOL to invoice</title>
+<meta name="description" content="Snap the signed BOL or POD, PODsnap reads it on your phone and builds a factoring-ready invoice packet in under a minute.">
+<meta name="theme-color" content="#ff5a1f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="config.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#" aria-label="PODsnap home">
+    <span class="stamp">POD</span><span class="word">snap</span>
+  </a>
+  <nav class="topnav">
+    <button class="ghost" id="newLoad" type="button">+ New load</button>
+    <select id="loadPicker" aria-label="Saved loads"></select>
+    <a class="cta small" href="pricing.html">Pricing</a>
+  </nav>
+</header>
+
+<div class="tabs" role="tablist">
+  <button role="tab" id="tabDocs" aria-selected="true" data-pane="docs">1 · Snap</button>
+  <button role="tab" id="tabInv" aria-selected="false" data-pane="invoice">2 · Invoice</button>
+</div>
+
+<main class="split" id="split" data-active="docs">
+  <!-- LEFT: capture -->
+  <section class="pane docs" id="paneDocs" aria-label="Documents">
+    <div class="pane-head">
+      <h2>Paperwork</h2>
+      <p class="hint">Rate con, BOL, POD, lumper receipt. Text is read on this device — nothing is uploaded.</p>
+    </div>
+
+    <label class="dropzone" for="fileIn">
+      <input id="fileIn" type="file" accept="image/*" capture="environment" multiple>
+      <span class="dz-icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="40" height="40"><path d="M8 14h7l3-5h12l3 5h7v24H8z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><circle cx="24" cy="26" r="7" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+      </span>
+      <span class="dz-main">Snap or pick a page</span>
+      <span class="dz-sub">Flat surface, all four corners in frame</span>
+    </label>
+
+    <ul class="thumbs" id="thumbs"></ul>
+
+    <div class="ocr-bar">
+      <button id="ocrBtn" class="cta" type="button" disabled>Read text &amp; fill invoice</button>
+      <span id="ocrStatus" class="status" aria-live="polite"></span>
+    </div>
+
+    <details class="ocr-lines" id="ocrBox">
+      <summary>Read text <span class="muted">— tap a line to drop it into the field you last touched</span></summary>
+      <ol id="ocrLines"></ol>
+    </details>
+
+    <div class="checklist" id="checklist">
+      <h3>Factor-ready check</h3>
+      <p class="hint">The top reasons factors bounce a packet. Tick them before you send.</p>
+      <label><input type="checkbox" data-chk="sig"> Receiver signature + date on the POD</label>
+      <label><input type="checkbox" data-chk="legible"> Every page legible, no cut-off edges</label>
+      <label><input type="checkbox" data-chk="match"> Load # / PO matches the rate con</label>
+      <label><input type="checkbox" data-chk="ratecon"> Rate confirmation attached</label>
+    </div>
+  </section>
+
+  <!-- RIGHT: invoice -->
+  <section class="pane invoice" id="paneInv" aria-label="Invoice">
+    <div class="pane-head row">
+      <div>
+        <h2>Invoice <span class="mono" id="invNoLabel"></span></h2>
+        <p class="hint" id="savedHint">Saved on this device</p>
+      </div>
+      <button class="ghost" id="carrierToggle" type="button">Your company ▾</button>
+    </div>
+
+    <form id="invForm" autocomplete="off" onsubmit="return false">
+      <fieldset class="carrier" id="carrierBox" hidden>
+        <legend>Your company <span class="muted">(remembered)</span></legend>
+        <div class="grid">
+          <label>Carrier name<input name="c_name" data-carrier></label>
+          <label>MC / DOT<input name="c_mc" data-carrier></label>
+          <label class="wide">Address<input name="c_addr" data-carrier></label>
+          <label>Phone<input name="c_phone" data-carrier inputmode="tel"></label>
+          <label>Email<input name="c_email" data-carrier inputmode="email"></label>
+          <label class="wide">Remit to / factor NOA <span class="muted">(shown on invoice)</span><textarea name="c_remit" rows="2" data-carrier></textarea></label>
+          <label>Next invoice #<input name="c_next" data-carrier inputmode="numeric"></label>
+          <label>Factor / broker AP email<input name="c_factor" data-carrier inputmode="email"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Bill to</legend>
+        <div class="grid">
+          <label class="wide">Broker / customer<input name="broker"></label>
+          <label>Broker MC<input name="broker_mc"></label>
+          <label>AP email<input name="broker_email" inputmode="email"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Load</legend>
+        <div class="grid">
+          <label>Load #<input name="load_no" class="mono"></label>
+          <label>BOL #<input name="bol_no" class="mono"></label>
+          <label>PO #<input name="po_no" class="mono"></label>
+          <label>Delivered<input name="del_date" type="date"></label>
+          <label class="wide">Shipper / pickup<textarea name="shipper" rows="2"></textarea></label>
+          <label class="wide">Consignee / delivery<textarea name="consignee" rows="2"></textarea></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Charges</legend>
+        <div class="grid money">
+          <label>Linehaul<input name="rate" inputmode="decimal" class="mono"></label>
+          <label>Detention<input name="detention" inputmode="decimal" class="mono"></label>
+          <label>Lumper<input name="lumper" inputmode="decimal" class="mono"></label>
+          <label>Other<input name="other" inputmode="decimal" class="mono"></label>
+          <label class="wide">Notes<input name="notes"></label>
+        </div>
+        <div class="total"><span>Total due</span><output id="total" class="mono">$0.00</output></div>
+      </fieldset>
+    </form>
+
+    <div class="actions">
+      <button class="cta big" id="packetBtn" type="button">Build packet PDF</button>
+      <button class="ghost" id="emailBtn" type="button">Email it</button>
+      <span id="packetStatus" class="status" aria-live="polite"></span>
+    </div>
+  </section>
+</main>
+
+<section class="pitch" aria-label="Pricing">
+  <div>
+    <h2>Get paid the day you deliver.</h2>
+    <p>Free to try on this page. <strong>$<span data-price="monthly">14</span>/mo</strong> unlocks unlimited packets, saved brokers, and the iPhone&nbsp;Duo app when it ships.</p>
+  </div>
+  <a class="cta" href="pricing.html">Start</a>
+</section>
+
+<footer class="foot">
+  <span>PODsnap keeps your loads in this browser only. Clear site data = gone. Export a packet before you wipe.</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PODsnap Pricing</title>
+<meta name="description" content="Owner-operators: turn the signed BOL into a factoring-ready invoice packet before you leave the dock.">
+<meta name="theme-color" content="#ff5a1f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="config.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html" aria-label="PODsnap app"><span class="stamp">POD</span><span class="word">snap</span></a>
+  <nav class="topnav"><a class="ghost" href="index.html" style="text-decoration:none">Open the app</a></nav>
+</header>
+
+<main class="sales">
+  <section class="hero">
+    <h1>Leave the dock<br><em>already invoiced.</em></h1>
+    <p>Snap the signed BOL. PODsnap reads it on your phone, fills the invoice, stacks the rate con, BOL, POD and lumper receipt behind it, and hands you one PDF to send your factor or broker — before you pull out.</p>
+    <p><a class="cta big start" href="#start">Start — $<span data-price="monthly">14</span>/mo</a></p>
+  </section>
+
+  <ol class="steps">
+    <li><strong>Snap.</strong> BOL, POD, rate con, lumper. Pages get cleaned up into scan-style black and white.</li>
+    <li><strong>Read.</strong> Load #, BOL #, PO, shipper, consignee, rate and delivery date pulled out on-device. No uploads, no per-scan fees.</li>
+    <li><strong>Check.</strong> The four things factors bounce packets for — signature, legibility, matching load #, rate con — ticked before you send.</li>
+    <li><strong>Send.</strong> One PDF. Mail, text, or your factor's upload page from the share sheet.</li>
+  </ol>
+
+  <div class="math">
+    Why it pays for itself:<br>
+    A bounced packet adds 24–48 hrs before funding.<br>
+    On a $2,400 load at 3% factoring, one bounce a month costs you more in<br>
+    float and phone calls than PODsnap does all year at $14/mo.
+  </div>
+
+  <section class="plans" id="start">
+    <div class="plan">
+      <h3>Try it</h3>
+      <div class="price">$0</div>
+      <ul>
+        <li>Full app in your browser</li>
+        <li>Loads saved on your phone</li>
+        <li>Packet PDF with all pages</li>
+      </ul>
+      <a class="ghost" href="index.html" style="text-align:center;text-decoration:none">Open the app</a>
+    </div>
+    <div class="plan feature">
+      <h3>Owner-operator</h3>
+      <div class="price">$<span data-price="monthly">14</span><small>/mo</small></div>
+      <ul>
+        <li>Unlimited packets, saved brokers + AP emails</li>
+        <li>Invoice numbering + paid / unpaid tracking</li>
+        <li>iPhone Duo app (camera on one half, invoice on the other) at launch</li>
+        <li>Cancel any time, text me directly for help</li>
+      </ul>
+      <button class="cta big start" type="button">Start</button>
+      <form class="reqform" id="reqform" hidden>
+        <p class="hint">Checkout isn't switched on yet. Leave your details — I'll set you up personally today.</p>
+        <label>Name<input name="name" required></label>
+        <label>MC # <span class="muted">(optional)</span><input name="mc" inputmode="numeric"></label>
+        <label>Phone or email<input name="reach" required></label>
+        <label>Who do you factor with? <span class="muted">(optional)</span><input name="factor"></label>
+        <button class="cta" type="submit">Request access</button>
+        <div class="copy" id="reqcopy" hidden></div>
+      </form>
+    </div>
+    <div class="plan">
+      <h3>Done-with-you setup</h3>
+      <div class="price">$<span data-price="pilot">29</span><small> once</small></div>
+      <ul>
+        <li>15-min call: your logo, remit-to / NOA, factor email loaded in</li>
+        <li>Your first 3 packets checked by a person</li>
+        <li>First 60 days of Owner-operator included</li>
+      </ul>
+      <button class="ghost start" type="button">Book setup</button>
+    </div>
+  </section>
+
+  <dl class="faq">
+    <dt>Does my paperwork go to a server?</dt>
+    <dd>No. Text reading runs in your browser (and on-device in the iPhone app). Loads are saved on your phone.</dd>
+    <dt>Does it work with my factoring company?</dt>
+    <dd>The packet is a plain PDF — invoice first, then each document — which is what most factors' upload pages and AP inboxes expect.</dd>
+    <dt>What about the iPhone Duo?</dt>
+    <dd>Unfolded, the camera and the invoice sit side by side. Folded, it's a two-step flow on the outer screen. Your draft carries over when you fold.</dd>
+  </dl>
+</main>
+
+<script>
+(() => {
+  const C = window.PODSNAP_CONFIG || {};
+  document.querySelectorAll("[data-price='monthly']").forEach(e => e.textContent = C.PRICE_MONTHLY || 14);
+  document.querySelectorAll("[data-price='pilot']").forEach(e => e.textContent = C.PRICE_PILOT || 29);
+  const form = document.getElementById("reqform");
+  document.querySelectorAll(".start").forEach(b => b.addEventListener("click", e => {
+    if (C.PAY_URL) { e.preventDefault(); window.open(C.PAY_URL, "_blank", "noopener"); return; }
+    if (b.tagName === "A") { e.preventDefault(); document.getElementById("start").scrollIntoView({ behavior: "smooth" }); }
+    form.hidden = false;
+    form.dataset.plan = b.textContent.includes("setup") ? "Done-with-you setup" : "Owner-operator";
+    setTimeout(() => form.querySelector("input").focus(), 300);
+  }));
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(form));
+    const msg = `PODsnap request (${form.dataset.plan || "Owner-operator"})\nName: ${d.name}\nMC: ${d.mc || "-"}\nReach me: ${d.reach}\nFactor: ${d.factor || "-"}`;
+    const to = (C.CONTACT || "").trim();
+    if (!to) {
+      const box = document.getElementById("reqcopy");
+      box.hidden = false;
+      box.textContent = "Copy this and send it to the person who shared this page:\n\n" + msg;
+      return;
+    }
+    const isMail = to.includes("@");
+    location.href = isMail
+      ? `mailto:${to}?subject=${encodeURIComponent("PODsnap access")}&body=${encodeURIComponent(msg)}`
+      : `sms:${to.replace(/[^\d+]/g, "")}${/iPhone|iPad|Mac/.test(navigator.userAgent) ? "&" : "?"}body=${encodeURIComponent(msg)}`;
+  });
+})();
+</script>
+</body>
+</html>

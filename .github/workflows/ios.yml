@@ -1,0 +1,47 @@
+name: ios
+on:
+  push:
+    branches: [main]
+    paths: ["ios/**", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+jobs:
+  build:
+    # GitHub's Xcode 27 runner image (GA 2026-10-15). Builds against the iOS 27.x SDK so the
+    # app fills the iPhone Duo inner display instead of letterboxing.
+    runs-on: xcode-27
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: select newest Xcode 27.x
+        run: |
+          ls -d /Applications/Xcode*.app || true
+          XC=$(ls -d /Applications/Xcode_27*.app /Applications/Xcode-27*.app /Applications/Xcode27*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XC" ]; then XC=$(ls -d /Applications/Xcode*.app | sort -V | tail -1); fi
+          echo "selecting $XC"
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+          xcodebuild -showsdks
+      - name: xcodegen
+        working-directory: ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: build (unsigned, simulator)
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project PODsnap.xcodeproj \
+            -scheme PODsnap \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            > build.log 2>&1 || { grep -E "error:" build.log | head -60; tail -30 build.log; exit 1; }
+          grep -E "BUILD SUCCEEDED" build.log
+      - name: upload log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: ios/build.log

@@ -1,0 +1,13 @@
+{
+  "name": "PODsnap — BOL to invoice",
+  "short_name": "PODsnap",
+  "description": "Snap the BOL, get a factoring-ready invoice packet.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3efe6",
+  "theme_color": "#ff5a1f",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

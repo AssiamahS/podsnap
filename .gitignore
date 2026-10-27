@@ -1,0 +1,6 @@
+.DS_Store
+ios/*.xcodeproj
+ios/PODsnap/Info.plist
+ios/build/
+ios/build.log
+node_modules/
