@@ -15,7 +15,8 @@ jobs:
       - name: select newest Xcode 27.x
         run: |
           ls -d /Applications/Xcode*.app || true
-          XC=$(ls -d /Applications/Xcode_27*.app /Applications/Xcode-27*.app /Applications/Xcode27*.app 2>/dev/null | sort -V | tail -1)
+          # stable releases only (skip *_Release_Candidate / *_beta), highest 27.x wins
+          XC=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | grep -viE "candidate|beta|_rc" | sort -V | tail -1)
           if [ -z "$XC" ]; then XC=$(ls -d /Applications/Xcode*.app | sort -V | tail -1); fi
           echo "selecting $XC"
           sudo xcode-select -s "$XC/Contents/Developer"
